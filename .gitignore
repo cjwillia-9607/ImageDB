@@ -1,0 +1,7 @@
+backend/env/
+backend/app/static/
+backend/app/storage/
+backend/app/repositories/__pycache__
+backend/app/__pycache__
+backend/app/models/__pycache__
+backend/app/routers/__pycache__
