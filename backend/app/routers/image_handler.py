@@ -51,8 +51,15 @@ def read_images(skip: int = 0, limit: int = 10, title: Optional[str] = Query(Non
         images = get_images(db, skip=skip, limit=limit)
     return images
 
+@router.get("/images/display/", response_model=List[ImageRead])
+def display_images(limit: int = 10, db: Session = Depends(get_db)):
+    if type(limit) != int:
+        raise HTTPException(status_code=400, detail="Limit must be an integer")
+    images = get_images(db, skip=0, limit=limit)
+    return images
+
 @router.delete("/images/{image_id}", response_model=ImageRead)
-def delete_image(image_id: int, db: Session = Depends(get_db)):
+def delete_image_endpoint(image_id: int, db: Session = Depends(get_db)):
     db_image = delete_image(db, image_id)
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -67,10 +74,12 @@ async def upload_image(
     db: Session = Depends(get_db)
 ):
     # Ensure the directory exists
-    file_path = "app/static"
-    os.makedirs(file_path, exist_ok=True)
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))  # Get the base directory
+    static_dir_path = os.path.join(base_dir, 'frontend\\static')  # Construct the static directory path
+    print(static_dir_path)
+    os.makedirs(static_dir_path, exist_ok=True)
 
-    file_location = os.path.join(file_path, file.filename)
+    file_location = os.path.join(static_dir_path, file.filename)
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     url = f"/static/{file.filename}"

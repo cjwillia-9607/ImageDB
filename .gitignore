@@ -1,5 +1,6 @@
 backend/env/
 backend/app/static/
+frontend/static/
 backend/app/storage/
 backend/app/repositories/__pycache__
 backend/app/__pycache__
