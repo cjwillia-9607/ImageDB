@@ -65,7 +65,7 @@ def delete_image_endpoint(image_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Image not found")
     return db_image
 
-# New endpoint to handle file uploads and store the URL in the database
+# FUNCTIONALITY IS DEPRECATED FOR NOW
 @router.post("/uploadfile/", response_model=ImageRead)
 async def upload_image(
     title: str, 
@@ -74,8 +74,8 @@ async def upload_image(
     db: Session = Depends(get_db)
 ):
     # Ensure the directory exists
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))  # Get the base directory
-    static_dir_path = os.path.join(base_dir, 'frontend\\static')  # Construct the static directory path
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # Get the base directory
+    static_dir_path = os.path.join(base_dir, 'static')  # Construct the static directory path
     print(static_dir_path)
     os.makedirs(static_dir_path, exist_ok=True)
 

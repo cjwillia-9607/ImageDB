@@ -28,7 +28,11 @@ app.include_router(tag_handler.router)
 app.include_router(image_tag_handler.router)
 
 # Mount the static directory to serve static files
-base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # Get the base directory
-static_dir_path = os.path.join(base_dir, 'frontend\\static')  # Construct the static directory path
-print(static_dir_path)
-app.mount("/frontend/static", StaticFiles(directory=static_dir_path), name="static")
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Get the base directory
+static_dir_path = os.path.join(base_dir, 'static')  # Construct the static directory path
+try:
+    os.mkdir(static_dir_path)  # Create the static directory if it does not exist
+except FileExistsError:
+    pass
+# print(static_dir_path)
+app.mount("/static", StaticFiles(directory=static_dir_path), name="static")

@@ -1,17 +1,17 @@
 <template>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  </head>
   <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
   <ImageGallery />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 import ImageGallery from './components/ImageGallery.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
     ImageGallery,
   }
 }
