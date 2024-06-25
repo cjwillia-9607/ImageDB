@@ -3,6 +3,7 @@
     <h1>Image Gallery</h1>
     <SearchBar @search="handleSearch" />
     <FilterTable @filter="handleFilter" />
+    <button @click="openUploadModal">Add New Image</button>
     <div class="image-grid" v-if="images.length">
       <div class="image-item" v-for="image in images" :key="image.id" @click="showImage(image)">
         <img :src="image.url" :alt="image.title" />
@@ -13,13 +14,17 @@
       <p>No images available</p>
     </div>
     <!-- EXPERIMENTING WITH MODALS -->
-    <ModalComponent :isOpen="isModalOpened" @modal-close="closeModal" @submit="submitHandler" name="first-modal">
+    <ModalComponent :isOpen="isImgModalOpen" @modal-close="closeImgModal" name="image-modal">
       <template #header>Custom header</template>
       <template #content>
         <img :src="modal_image.url" :alt="modal_image.title" v-if="modal_image"/>
       </template>
-      <!-- <template #footer>Custom content</template> -->
-      
+    </ModalComponent>
+    <ModalComponent :isOpen="isUploadModalOpen" @modal-close="closeUploadModal" name="upload-modal">
+        <template #header>Upload Image</template>
+        <template #content>
+          <UploadImage @upload="uploadImage" />
+        </template>
     </ModalComponent>
   </div>
 </template>
@@ -29,11 +34,14 @@
   import SearchBar from './SearchBar.vue';
   import FilterTable from './FilterTable.vue';
   import ModalComponent from "./ModalComponent.vue";
+  import UploadImage from "./UploadImage.vue";
+  // import { is } from 'core-js/core/object';
   export default {
     components: {
       SearchBar,
       FilterTable,
-      ModalComponent
+      ModalComponent,
+      UploadImage
     },
     data() {
       return {
@@ -41,7 +49,8 @@
         query: '',
         skip: 0,
         limit: 10,
-        isModalOpened: false,
+        isImgModalOpen: false,
+        isUploadModalOpen: false,
         modal_image: {
           url: '',
           title: ''
@@ -74,17 +83,30 @@
       handleFilter({ skip, limit }) {
         this.skip = skip;
         this.limit = limit;
-        // this.fetchImages(this.query, skip, limit);
-      },closeModal(){
-        this.isModalOpened = false;
-      },openModal(){
-        this.isModalOpened = true;
-      },submitHandler(){
-        //here you do whatever
-      
+      },closeImgModal(){
+        this.isImgModalOpen = false;
+      },openImgModal(){
+        this.isImgModalOpen = true;
       },showImage(image){
         this.modal_image = image;
-        this.openModal();
+        this.openImgModal();
+      },openUploadModal(){
+        this.isUploadModalOpen = true;
+      },closeUploadModal(){
+        this.isUploadModalOpen = false;
+      },uploadImage(title, description, url){
+        axios.post(`http://localhost:8000/images`, {
+          title: title,
+          description: description,
+          url: url
+        })
+        .then(response => {
+          this.images.push(response.data);
+          this.closeUploadModal();
+        })
+        .catch(error => {
+          console.error('Error uploading image:', error);
+        });
       }
     }
   };
@@ -115,6 +137,15 @@
   .image-item p {
     text-align: center;
     margin-top: 8px;
+  }
+
+  .modal-content img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    /* border: 5px solid red; */
   }
 
   </style>

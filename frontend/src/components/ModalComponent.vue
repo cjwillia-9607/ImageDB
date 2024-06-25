@@ -101,8 +101,9 @@ onClickOutside(target, ()=>emit('modal-close'))
 
   .modal-container {
     max-width: 90vw;
-    max-height: 90vh;
-    overflow: hidden;
+    max-height: 95vh;
+    /* overflow: hidden; */
+    overflow-y: auto;
     background-color: #fff;
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -116,17 +117,17 @@ onClickOutside(target, ()=>emit('modal-close'))
     align-items: center;
     padding: 10px;
     flex-grow: 1;
-    background-color: yellow;
+    /* background-color: yellow; */
   }
 
-  .modal-content img {
-    /* max-width: 100%;
+  /* .modal-content img {
+    max-width: 100%;
     max-height: 100%;
     width: auto;
     height: auto;
-    display: block; */
+    display: block;
     border: 5px solid red;
-  }
+  } */
 
   .modal-header, .modal-footer {
     display: flex;
