@@ -253,6 +253,7 @@
     display: flex;
     flex-wrap: wrap;
     margin-top: 1em;
+    width: 100%;
   }
   .tag-container button{
     margin-top: 1em;
