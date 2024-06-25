@@ -1,4 +1,5 @@
 backend/env/
+backend/test.db
 backend/app/static/
 frontend/static/
 backend/app/storage/

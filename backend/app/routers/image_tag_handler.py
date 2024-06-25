@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.storage.db import get_db
-from app.repositories.image_tag_db import create_image_tag, get_image_tags, delete_image_tag
+from app.repositories.image_tag_db import create_image_tag, get_tags_by_image_id, get_images_by_tag_id, get_image_tags_by_img, get_image_tags_by_tag, delete_image_tag
 from app.repositories.tag_db import get_tag_by_name, create_tag
 from app.models.image_tag import ImageTag as ImageTagModel
+from app.routers.tag_handler import TagRead
+from app.routers.image_handler import ImageRead
 from pydantic import BaseModel
 # Pydantic model for creating an image tag association
 class ImageTagCreate(BaseModel):
@@ -31,9 +33,24 @@ def create_new_image_tag(image_tag: ImageTagCreate, db: Session = Depends(get_db
     db_image_tag = create_image_tag(db, image_id=image_tag.image_id, tag_id=db_tag.id)
     return db_image_tag
 
-@router.get("/image_tags/{image_id}", response_model=List[ImageTagRead])
+@router.get("/images/{image_id}/tags", response_model=List[TagRead])
+def read_tags_by_image(image_id: int, db: Session = Depends(get_db)):
+    tags = get_tags_by_image_id(db, image_id)
+    return tags
+
+@router.get("/tags/{tag_id}/images", response_model=List[ImageRead])
+def read_images_by_tag(tag_id: int, db: Session = Depends(get_db)):
+    images = get_images_by_tag_id(db, tag_id)
+    return images
+
+@router.get("/image_tags/image/{image_id}", response_model=List[ImageTagRead])
 def read_image_tags(image_id: int, db: Session = Depends(get_db)):
-    image_tags = get_image_tags(db, image_id=image_id)
+    image_tags = get_image_tags_by_img(db, image_id=image_id)
+    return image_tags
+
+@router.get("/image_tags/tag/{tag_id}", response_model=List[ImageTagRead])
+def read_image_tags(tag_id: int, db: Session = Depends(get_db)):
+    image_tags = get_image_tags_by_tag(db, tag_id=tag_id)
     return image_tags
 
 @router.delete("/image_tags/{image_id}/{tag_id}", response_model=ImageTagRead)

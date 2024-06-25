@@ -24,7 +24,7 @@ router = APIRouter()
 def create_new_tag(tag: TagCreate, db: Session = Depends(get_db)):
     db_tag = get_tag_by_name(db, name=tag.name)
     if db_tag:
-        raise HTTPException(status_code=400, detail="Tag already exists")
+        return db_tag
     db_tag = create_tag(db, name=tag.name)
     return db_tag
 
@@ -35,9 +35,11 @@ def read_tag(tag_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Tag not found")
     return db_tag
 
-@router.get("/tags/name/{name}", response_model=List[TagRead])
+@router.get("/tags/name/{name}", response_model=TagRead)
 def read_tags(name: str, db: Session = Depends(get_db)):
     tags = get_tag_by_name(db, name)
+    if tags is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
     return tags
 
 @router.delete("/tags/{tag_id}", response_model=TagRead)

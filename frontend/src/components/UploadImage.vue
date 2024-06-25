@@ -34,9 +34,9 @@
         this.$emit('upload', this.title, this.description, this.url, this.tags);
       },
       addTag() {
-      if (this.newTag.trim() && !this.tags.includes(this.newTag.trim())) {
-        this.tags.push(this.newTag.trim());
-        this.newTag = '';
+        if (this.newTag.trim() && !this.tags.includes(this.newTag.trim())) {
+          this.tags.push(this.newTag.trim());
+          this.newTag = '';
         }
       }
     }

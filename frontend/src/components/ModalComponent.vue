@@ -112,7 +112,7 @@ onClickOutside(target, ()=>emit('modal-close'))
   }
 
   .modal-content {
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: center;
     padding: 10px;
@@ -131,7 +131,7 @@ onClickOutside(target, ()=>emit('modal-close'))
 
   .modal-header, .modal-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 10px;
   }
