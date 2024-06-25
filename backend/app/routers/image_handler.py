@@ -31,38 +31,9 @@ class ImageRead(BaseModel):
 
 router = APIRouter()
 
-@router.get("/images/{image_id}", response_model=ImageRead)
-def read_image(image_id: int, db: Session = Depends(get_db)):
-    db_image = get_image(db, image_id)
-    if db_image is None:
-        raise HTTPException(status_code=404, detail="Image not found")
-    return db_image
-
 @router.post("/images/", response_model=ImageRead)
 def create_new_image(image: ImageCreateWithUrl, db: Session = Depends(get_db)):
     db_image = create_image(db, title=image.title, description=image.description, url=image.url)
-    return db_image
-
-@router.get("/images/", response_model=List[ImageRead])
-def read_images(skip: int = 0, limit: int = 10, title: Optional[str] = Query(None), db: Session = Depends(get_db)):
-    if title:
-        images = get_images_by_title(db, title=title)
-    else:
-        images = get_images(db, skip=skip, limit=limit)
-    return images
-
-@router.get("/images/display/", response_model=List[ImageRead])
-def display_images(limit: int = 10, db: Session = Depends(get_db)):
-    if type(limit) != int:
-        raise HTTPException(status_code=400, detail="Limit must be an integer")
-    images = get_images(db, skip=0, limit=limit)
-    return images
-
-@router.delete("/images/{image_id}", response_model=ImageRead)
-def delete_image_endpoint(image_id: int, db: Session = Depends(get_db)):
-    db_image = delete_image(db, image_id)
-    if db_image is None:
-        raise HTTPException(status_code=404, detail="Image not found")
     return db_image
 
 # FUNCTIONALITY IS DEPRECATED FOR NOW
@@ -84,4 +55,36 @@ async def upload_image(
         shutil.copyfileobj(file.file, buffer)
     url = f"/static/{file.filename}"
     db_image = create_image(db, title=title, description=description, url=url)
+    return db_image
+
+@router.get("/images/id/{image_id}", response_model=ImageRead)
+def read_image_by_id(image_id: int, db: Session = Depends(get_db)):
+    db_image = get_image(db, image_id)
+    if db_image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return db_image
+
+@router.get("/images/title/{title}", response_model=List[ImageRead])
+def read_image_by_title(title: str, db: Session = Depends(get_db)):
+    if title:
+        images = get_images_by_title(db, title=title)
+    return images
+
+@router.get("/images/", response_model=List[ImageRead])
+def read_images(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    images = get_images(db, skip=skip, limit=limit)
+    return images
+
+# @router.get("/images/display/", response_model=List[ImageRead])
+# def display_images(limit: int = 10, db: Session = Depends(get_db)):
+#     if type(limit) != int:
+#         raise HTTPException(status_code=400, detail="Limit must be an integer")
+#     images = get_images(db, skip=0, limit=limit)
+#     return images
+
+@router.delete("/images/{image_id}", response_model=ImageRead)
+def delete_image_endpoint(image_id: int, db: Session = Depends(get_db)):
+    db_image = delete_image(db, image_id)
+    if db_image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
     return db_image

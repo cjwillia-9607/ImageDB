@@ -2,7 +2,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   </head>
-  <img alt="Vue logo" src="./assets/logo.png">
+  <img alt="Vue logo" src="./assets/ceej logo good.png">
   <ImageGallery />
 </template>
 
@@ -25,5 +25,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+img {
+  width: 100px;
+  height: 100px;
 }
 </style>

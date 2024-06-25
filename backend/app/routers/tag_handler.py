@@ -20,13 +20,6 @@ class TagRead(BaseModel):
 
 router = APIRouter()
 
-@router.get("/tags/{tag_id}", response_model=TagRead)
-def read_tag(tag_id: int, db: Session = Depends(get_db)):
-    db_tag = get_tag(db, tag_id)
-    if db_tag is None:
-        raise HTTPException(status_code=404, detail="Tag not found")
-    return db_tag
-
 @router.post("/tags/", response_model=TagRead)
 def create_new_tag(tag: TagCreate, db: Session = Depends(get_db)):
     db_tag = get_tag_by_name(db, name=tag.name)
@@ -35,14 +28,16 @@ def create_new_tag(tag: TagCreate, db: Session = Depends(get_db)):
     db_tag = create_tag(db, name=tag.name)
     return db_tag
 
-@router.get("/tags/", response_model=List[TagRead])
-def read_tags(skip: int = 0, limit: int = 10, tag_id: int = 0, name: str = Query(None), db: Session = Depends(get_db)):
-    if name:
-        tags = search_tags_by_name(db, name=name, skip=skip, limit=limit)
-    elif tag_id:
-        tags = [get_tag(db, tag_id)]
-    else:
-        tags = get_tags(db, skip=skip, limit=limit)
+@router.get("/tags/id/{tag_id}", response_model=TagRead)
+def read_tag(tag_id: int, db: Session = Depends(get_db)):
+    db_tag = get_tag(db, tag_id)
+    if db_tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return db_tag
+
+@router.get("/tags/name/{name}", response_model=List[TagRead])
+def read_tags(name: str, db: Session = Depends(get_db)):
+    tags = get_tag_by_name(db, name)
     return tags
 
 @router.delete("/tags/{tag_id}", response_model=TagRead)

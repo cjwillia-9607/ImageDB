@@ -9,7 +9,7 @@ from pydantic import BaseModel
 # Pydantic model for creating an image tag association
 class ImageTagCreate(BaseModel):
     image_id: int
-    tag_id: int
+    tag_name: str
 
 # Pydantic model for reading an image tag association
 class ImageTagRead(BaseModel):
@@ -24,9 +24,9 @@ router = APIRouter()
 @router.post("/image_tags/", response_model=ImageTagRead)
 def create_new_image_tag(image_tag: ImageTagCreate, db: Session = Depends(get_db)):
     # Ensure the tag exists, create if it does not
-    db_tag = get_tag_by_name(db, name=image_tag.tag_id)
+    db_tag = get_tag_by_name(db, name=image_tag.tag_name)
     if not db_tag:
-        db_tag = create_tag(db, name=image_tag.tag_id)
+        db_tag = create_tag(db, name=image_tag.tag_name)
     
     db_image_tag = create_image_tag(db, image_id=image_tag.image_id, tag_id=db_tag.id)
     return db_image_tag

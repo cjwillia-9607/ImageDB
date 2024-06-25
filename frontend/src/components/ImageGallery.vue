@@ -1,7 +1,8 @@
 <template>
   <div>
-    <h1>Image Gallery</h1>
-    <SearchBar @search="handleSearch" />
+    <h1>Image Database</h1>
+    <p>created by Charles Williams</p>
+    <SearchBar @search="handleSearch"/>
     <FilterTable @filter="handleFilter" />
     <button @click="openUploadModal">Add New Image</button>
     <div class="image-grid" v-if="images.length">
@@ -13,13 +14,14 @@
     <div v-else>
       <p>No images available</p>
     </div>
-    <!-- EXPERIMENTING WITH MODALS -->
+    <!-- MODAL TO SEE FULL IAMGE -->
     <ModalComponent :isOpen="isImgModalOpen" @modal-close="closeImgModal" name="image-modal">
       <template #header>Custom header</template>
       <template #content>
         <img :src="modal_image.url" :alt="modal_image.title" v-if="modal_image"/>
       </template>
     </ModalComponent>
+    <!-- MODAL TO UPLOAD IMG TO DB -->
     <ModalComponent :isOpen="isUploadModalOpen" @modal-close="closeUploadModal" name="upload-modal">
         <template #header>Upload Image</template>
         <template #content>
@@ -61,12 +63,12 @@
       this.fetchImages();
     },
     methods: {
-      fetchImages(query = '', skip = 0, limit = 10) {
-        axios.get(`http://localhost:8000/images`, {
+      fetchImages(query = '', skip = 0, limit = 100) {
+        axios.get(`http://localhost:8000/images/`, {
           params: {
-            search: query,
             skip: skip,
-            limit: limit
+            limit: limit,
+            title: query
           }
         })
         .then(response => {
@@ -77,8 +79,18 @@
         });
       },
       handleSearch(query) {
-        this.query = query;
-        this.fetchImages(query, this.skip, this.limit);
+        // this.fetchImages('title/', query, this.skip, this.limit);
+        if (query === '') {
+          this.fetchImages();
+          return;
+        }
+        axios.get(`http://localhost:8000/images/title/` + query)
+        .then(response => {
+          this.images = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching images:', error);
+        });
       },
       handleFilter({ skip, limit }) {
         this.skip = skip;
@@ -95,7 +107,7 @@
       },closeUploadModal(){
         this.isUploadModalOpen = false;
       },uploadImage(title, description, url){
-        axios.post(`http://localhost:8000/images`, {
+        axios.post(`http://localhost:8000/images/`, {
           title: title,
           description: description,
           url: url
@@ -147,5 +159,14 @@
     display: block;
     /* border: 5px solid red; */
   }
-
+  button {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+    padding: 0.5em 1em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
   </style>

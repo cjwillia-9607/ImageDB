@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="search-bar">
       <input v-model="query" @keyup.enter="search" placeholder="Search images..." />
       <button @click="search">Search</button>
     </div>
@@ -28,5 +28,8 @@
   }
   button {
     padding: 0.5em;
+  }
+  .search-bar {
+    margin: 0.5em auto; /* Center the search bar with vertical margin */
   }
   </style>
