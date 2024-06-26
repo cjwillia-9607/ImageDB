@@ -4,7 +4,9 @@
     <p>created by Charles Williams</p>
     <SearchBar @search="handleSearch"/>
     <FilterTable @filter="handleFilter" />
-    <button @click="openUploadModal">Add New Image</button>
+    <div class="upload-button">
+      <button @click="openUploadModal">Add New Image</button>
+    </div>
     <div class="image-grid" v-if="images.length">
       <div class="image-item" v-for="image in images" :key="image.id" @click="showImage(image)">
         <img :src="image.url" :alt="image.title" />
@@ -34,7 +36,8 @@
           <div class="tag-input">
             <input v-model="newTag" @keydown.enter.prevent="addTag" placeholder="Add tag..." />
           </div>
-          <button @click="addTag">+</button>
+          <div class="add-button"><button @click="addTag">+</button></div>
+          <div class="delete-button"><button @click="addTag">X</button></div>
         </div>
         
       </template>
@@ -189,7 +192,7 @@
         .catch(error => {
           console.error('Error adding tag to image:', error);
         });
-      }, addTag(){
+      },addTag(){
         var tag_name = this.newTag.trim();
         if (tag_name && !this.modalImgTags.includes(tag_name)) {
           this.createTags([tag_name], this.modal_image.id);
@@ -197,12 +200,30 @@
           // this.showImage(this.modal_image);
           this.newTag = '';
         }
+      },deleteTag(tag_name){
+        axios.get(`http://localhost:8000/tags/name/` + tag_name)
+        .then(response => {
+          var tag_id = response.data.id;
+          axios.delete(`http://localhost:8000/image_tags/` + this.modal_image.id + `/` + tag_id)
+          .then(response => {
+            console.log('Tag deleted from image:', response.data);
+          })
+          .catch(error => {
+            console.error('Error deleting tag from image:', error);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching tag:', error);
+        });
+      },triggerDeleteProcess(){
+        this.deleteTag(this.newTag);
+        this.newTag = '';
       }
     }
   };
 </script>
   
-  <style scoped>
+<style scoped>
   .image-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -237,7 +258,7 @@
     display: block;
     /* border: 5px solid red; */
   }
-  button {
+  .upload-button button {
     margin-top: 0.5em;
     margin-bottom: 1em;
     margin-left: 1em;
@@ -255,22 +276,14 @@
     margin-top: 1em;
     width: 100%;
   }
-  .tag-container button{
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0.5em;
-    padding: 0.5em;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-  }
+
   .tag {
+    display: flex;
     padding: 0.5em;
-    margin: 0.5em;
+    margin-top: 1em;
+    margin-right: 0.25em;
+    margin-bottom: 1em;
+    margin-left: 0.25em;
     background-color: #e0e0e0;
     border-radius: 5px;
   }
@@ -279,4 +292,28 @@
     align-items: center;
     padding-right: 0.5em;
   }
-  </style>
+  .delete-button button{
+    display: flex;
+    padding: 0.5em;
+    margin-top: 1em;
+    margin-right: 0.25em;
+    margin-bottom: 1em;
+    margin-left: 0.25em;
+    color: white;
+    background-color: rgb(70, 70, 70);
+    border-radius: 5px;
+    border: none;
+  }
+  .add-button button{
+    display: flex;
+    padding: 0.5em;
+    margin-top: 1em;
+    margin-right: 0.25em;
+    margin-bottom: 1em;
+    margin-left: 0.25em;
+    color: white;
+    background-color: #007bff;
+    border-radius: 5px;
+    border: none;
+  }
+</style>
