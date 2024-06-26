@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
 from app.storage.db import get_db
-from app.repositories.tag_db import get_tag, create_tag, get_tags, delete_tag, get_tag_by_name, search_tags_by_name
+from app.repositories.tag_db import get_tag, create_tag, get_tags, remove_tag, get_tag_by_name, search_tags_by_name
 from app.models.tag import Tag as TagModel
 from pydantic import BaseModel
 
@@ -44,7 +44,7 @@ def read_tags(name: str, db: Session = Depends(get_db)):
 
 @router.delete("/tags/{tag_id}", response_model=TagRead)
 def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    db_tag = delete_tag(db, tag_id)
+    db_tag = remove_tag(db, tag_id)
     if db_tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
     return db_tag

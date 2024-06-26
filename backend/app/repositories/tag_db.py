@@ -14,7 +14,7 @@ def create_tag(db: Session, name: str):
 def get_tags(db: Session, skip: int = 0, limit: int = 10):
     return db.query(Tag).offset(skip).limit(limit).all()
 
-def delete_tag(db: Session, tag_id: int):
+def remove_tag(db: Session, tag_id: int):
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
     if tag:
         db.delete(tag)

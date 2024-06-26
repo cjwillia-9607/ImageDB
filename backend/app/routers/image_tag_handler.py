@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.storage.db import get_db
-from app.repositories.image_tag_db import create_image_tag, get_tags_by_image_id, get_images_by_tag_id, get_image_tags_by_img, get_image_tags_by_tag, delete_image_tag
+from app.repositories.image_tag_db import create_image_tag, get_tags_by_image_id, get_images_by_tag_id, get_image_tags_by_img, get_image_tags_by_tag, remove_image_tag
 from app.repositories.tag_db import get_tag_by_name, create_tag
 from app.models.image_tag import ImageTag as ImageTagModel
 from app.routers.tag_handler import TagRead
@@ -55,7 +55,7 @@ def read_image_tags(tag_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/image_tags/{image_id}/{tag_id}", response_model=ImageTagRead)
 def delete_image_tag(image_id: int, tag_id: int, db: Session = Depends(get_db)):
-    db_image_tag = delete_image_tag(db, image_id=image_id, tag_id=tag_id)
+    db_image_tag = remove_image_tag(db, image_id=image_id, tag_id=tag_id)
     if db_image_tag is None:
         raise HTTPException(status_code=404, detail="Image-Tag association not found")
     return db_image_tag

@@ -15,7 +15,7 @@ def get_image_tags_by_img(db: Session, image_id: int):
 def get_image_tags_by_tag(db: Session, tag_id: int):
     return db.query(ImageTag).filter(ImageTag.tag_id == tag_id).all()
 
-def delete_image_tag(db: Session, image_id: int, tag_id: int):
+def remove_image_tag(db: Session, image_id: int, tag_id: int):
     image_tag = db.query(ImageTag).filter(ImageTag.image_id == image_id, ImageTag.tag_id == tag_id).first()
     if image_tag:
         db.delete(image_tag)

@@ -29,15 +29,24 @@
           {{ modal_image.description }}
         </p>
         <!-- tags of the image (want to add option to add tags) -->
+        <!-- TODO: Find a Way to make tags start a new row instead of extending modal -->
         <div class="tag-container">
-          <div v-for="tag in modalImgTags" :key="tag" class="tag">
-            {{ tag }}
+          <div v-for="tag in modalImgTags" :key="tag" 
+          :class="['tag', {'tag-selected': selectedTags.includes(tag)}]">
+              <a class="modal-button" 
+              @click="deleteMode ? toggleTagForDeletion(tag) : handleSearch(`$${tag}`)">
+                {{ tag }}
+              </a>
           </div>
-          <div class="tag-input">
+          <div class="tag-input" v-if="!deleteMode">
             <input v-model="newTag" @keydown.enter.prevent="addTag" placeholder="Add tag..." />
           </div>
-          <div class="add-button"><button @click="addTag">+</button></div>
-          <div class="delete-button"><button @click="addTag">X</button></div>
+          <div class="add-button" v-if="!deleteMode">
+            <a class="modal-button" @click="deleteMode ? null : addTag()">+</a>
+          </div>
+          <div :class="['delete-button', {'delete-mode-active': deleteMode}]">
+            <a class="modal-button" @click="deleteMode ? deleteSelectedTags() : toggleDeleteMode()">X</a>
+          </div>
         </div>
         
       </template>
@@ -78,7 +87,9 @@
           title: ''
         },
         modalImgTags: [],
-        newTag: ''
+        newTag: '',
+        selectedTags: [],
+        deleteMode: false
       };
     },
     created() {
@@ -99,9 +110,8 @@
         .catch(error => {
           console.error('Error fetching images:', error);
         });
-      },
-      handleSearch(query) {
-        // this.fetchImages('title/', query, this.skip, this.limit);
+      },handleSearch(query) {
+        this.isImgModalOpen = false;
         if (query === '') {
           this.fetchImages();
           return;
@@ -130,8 +140,7 @@
             console.error('Error fetching images:', error);
           });
         }
-      },
-      handleFilter({ skip, limit }) {
+      },handleFilter({ skip, limit }) {
         this.skip = skip;
         this.limit = limit;
       },closeImgModal(){
@@ -193,6 +202,7 @@
           console.error('Error adding tag to image:', error);
         });
       },addTag(){
+        console.log("called addTag")
         var tag_name = this.newTag.trim();
         if (tag_name && !this.modalImgTags.includes(tag_name)) {
           this.createTags([tag_name], this.modal_image.id);
@@ -215,9 +225,23 @@
         .catch(error => {
           console.error('Error fetching tag:', error);
         });
-      },triggerDeleteProcess(){
-        this.deleteTag(this.newTag);
-        this.newTag = '';
+      },toggleDeleteMode(){
+        console.log("called toggleDeleteMode")
+        this.deleteMode = !this.deleteMode;
+      },toggleTagForDeletion(tag_name){
+        if (this.selectedTags.includes(tag_name)) {
+          this.selectedTags = this.selectedTags.filter(tag => tag !== tag_name);
+        }else{
+          this.selectedTags.push(tag_name);
+        }
+      },deleteSelectedTags(){
+
+        for (let tag of this.selectedTags) {
+          this.deleteTag(tag);
+          this.modalImgTags = this.modalImgTags.filter(t => t !== tag);
+        }
+        this.selectedTags = [];
+        this.toggleDeleteMode();
       }
     }
   };
@@ -250,14 +274,6 @@
     margin-top: 8px;
   }
 
-  .modal-content img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    display: block;
-    /* border: 5px solid red; */
-  }
   .upload-button button {
     margin-top: 0.5em;
     margin-bottom: 1em;
@@ -270,14 +286,21 @@
     cursor: pointer;
   }
 
+  .modal-content img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+  }
+  
   .tag-container {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     margin-top: 1em;
     width: 100%;
   }
 
-  .tag {
+  /* .tag {
     display: flex;
     padding: 0.5em;
     margin-top: 1em;
@@ -286,15 +309,31 @@
     margin-left: 0.25em;
     background-color: #e0e0e0;
     border-radius: 5px;
+  } */
+  .tag{
+    display: flex;
+    /* padding: 0.5em; */
+    margin-top: 1em;
+    margin-right: 0.75em;
+    margin-bottom: 1em;
+    color: white;
+    background-color: darkgrey;
+    border-radius: 5px;
+    border: none;
   }
+
+  .tag-selected{
+    background-color: rgb(255, 117, 117);
+  }
+   
   .tag-input {
     display: flex;
     align-items: center;
     padding-right: 0.5em;
   }
-  .delete-button button{
+  .delete-button{
     display: flex;
-    padding: 0.5em;
+    /* padding: 0.5em; */
     margin-top: 1em;
     margin-right: 0.25em;
     margin-bottom: 1em;
@@ -304,9 +343,12 @@
     border-radius: 5px;
     border: none;
   }
-  .add-button button{
+  .delete-mode-active{
+    background-color: red;
+  }
+  .add-button{
     display: flex;
-    padding: 0.5em;
+    /* padding: 0.5em; */
     margin-top: 1em;
     margin-right: 0.25em;
     margin-bottom: 1em;
@@ -315,5 +357,16 @@
     background-color: #007bff;
     border-radius: 5px;
     border: none;
+  }
+  .add-delete-active{
+    background-color: #6386ac;
+  }
+  
+  .modal-button{
+    padding: 0.5em;
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
   }
 </style>
