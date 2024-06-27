@@ -29,7 +29,7 @@ def create_new_tag(tag: TagCreate, db: Session = Depends(get_db)):
     return db_tag
 
 @router.get("/tags/all/", response_model=List[TagRead])
-def get_all_tags(db:Session, skip: int = 0, limit: int = 1000):
+def get_all_tags(db:Session = Depends(get_db), skip: int = 0, limit: int = 1000):
     db_tags = get_tags(db, skip=skip, limit=limit)
     return db_tags
 
