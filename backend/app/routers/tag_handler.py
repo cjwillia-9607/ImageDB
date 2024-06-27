@@ -28,6 +28,11 @@ def create_new_tag(tag: TagCreate, db: Session = Depends(get_db)):
     db_tag = create_tag(db, name=tag.name)
     return db_tag
 
+@router.get("/tags/all/", response_model=List[TagRead])
+def get_all_tags(db:Session, skip: int = 0, limit: int = 1000):
+    db_tags = get_tags(db, skip=skip, limit=limit)
+    return db_tags
+
 @router.get("/tags/id/{tag_id}", response_model=TagRead)
 def read_tag(tag_id: int, db: Session = Depends(get_db)):
     db_tag = get_tag(db, tag_id)
@@ -48,4 +53,3 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     if db_tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
     return db_tag
-

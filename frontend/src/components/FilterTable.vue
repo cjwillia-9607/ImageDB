@@ -1,18 +1,18 @@
 <template>
-    <div class="filter-box">
-      <label for="skip">Skip:</label>
-      <select v-model="skip" @change="applyFilters">
-        <option v-for="option in skipOptions" :key="option" :value="option">{{ option }}</option>
-      </select>
+  <div class="filter-box">
+    <label for="skip">Skip:</label>
+    <select v-model="skip" @change="applyFilters">
+      <option v-for="option in skipOptions" :key="option" :value="option">{{ option }}</option>
+    </select>
+
+    <label for="limit">Limit:</label>
+    <select v-model="limit" @change="applyFilters">
+      <option v-for="option in limitOptions" :key="option" :value="option">{{ option }}</option>
+    </select>
+  </div>
+</template>
   
-      <label for="limit">Limit:</label>
-      <select v-model="limit" @change="applyFilters">
-        <option v-for="option in limitOptions" :key="option" :value="option">{{ option }}</option>
-      </select>
-    </div>
-  </template>
-  
-  <script>
+<script>
   export default {
     data() {
       return {
@@ -28,9 +28,9 @@
       }
     }
   };
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   /* Add any styles specific to your filter component here */
   label {
     margin-right: 0.5em;
@@ -47,4 +47,4 @@
     background-color: #f9f9f9; /* Optionally, add a background color */
     max-width: calc(100% - 2em); /* Ensure the box is not wider than the viewport minus padding */
   }
-  </style>
+</style>

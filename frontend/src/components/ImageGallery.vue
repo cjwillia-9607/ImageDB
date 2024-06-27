@@ -2,11 +2,20 @@
   <div>
     <h1>Image Database</h1>
     <p>created by Charles Williams</p>
-    <SearchBar @search="handleSearch"/>
-    <FilterTable @filter="handleFilter" />
-    <div class="upload-button">
-      <button @click="openUploadModal">Add New Image</button>
+    <!-- Search and Add Feature -->
+    <div v-if="searchTagToggle">
+      <SearchBar @search="handleSearch"/>
+      <FilterTable @filter="handleFilter" />
+      <div class="upload-button">
+        <button @click="openUploadModal">Add New Image</button>
+      </div>
     </div>
+    <!-- Search by list of Tags -->
+     <div v-if="!searchTagToggle">
+      
+     </div>
+
+
     <div class="image-grid" v-if="images.length">
       <div class="image-item" v-for="image in images" :key="image.id" @click="showImage(image)">
         <img :src="image.url" :alt="image.title" />
@@ -89,7 +98,8 @@
         modalImgTags: [],
         newTag: '',
         selectedTags: [],
-        deleteMode: false
+        deleteMode: false,
+        searchTagToggle: true
       };
     },
     created() {
