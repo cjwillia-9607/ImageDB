@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models.image_tag import ImageTag
 from app.models.tag import Tag
 from app.models.image import Image
@@ -27,3 +28,6 @@ def get_tags_by_image_id(db: Session, image_id: int):
 
 def get_images_by_tag_id(db: Session, tag_id: int):
     return db.query(Image).join(ImageTag).filter(ImageTag.tag_id == tag_id).all()
+
+def count_images_by_tag_id(db: Session, tag_id: int):
+    return db.query(func.count(ImageTag.image_id)).filter(ImageTag.tag_id == tag_id).scalar()

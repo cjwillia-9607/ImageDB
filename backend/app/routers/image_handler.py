@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.storage.db import get_db
-from app.repositories.image_db import get_image, create_image, get_images, delete_image, get_images_by_title
+from app.repositories.image_db import get_image, create_image, get_images, delete_image, get_images_by_title, get_images_by_tags
 from app.models.image import Image as ImageModel
 from pydantic import BaseModel
 import shutil
@@ -88,3 +88,11 @@ def delete_image_endpoint(image_id: int, db: Session = Depends(get_db)):
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return db_image
+
+@router.get("/images/by_tags", response_model=List[ImageRead])
+def read_images_by_tags(tag_ids: Optional[List[int]] = Query(None), db: Session = Depends(get_db)):
+    if not tag_ids:
+        images = get_images(db, skip=0, limit=1000)
+    else:
+        images = get_images_by_tags(db, tag_ids)
+    return images

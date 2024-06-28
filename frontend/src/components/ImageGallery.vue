@@ -2,20 +2,21 @@
   <div>
     <h1>Image Database</h1>
     <p>created by Charles Williams</p>
+    <button @click="toggleSearchMode">Change Search Mode</button>
     <!-- Search and Add Feature -->
     <div v-if="searchTagToggle">
       <SearchBar @search="handleSearch"/>
       <FilterTable @filter="handleFilter" />
-      <div class="upload-button">
-        <button @click="openUploadModal">Add New Image</button>
-      </div>
     </div>
     <!-- Search by list of Tags -->
-     <div v-if="!searchTagToggle">
-      
-     </div>
-
-
+    <div v-if="!searchTagToggle">
+      <TagList @taglist="handleTags" />
+    </div>
+    <!-- Add New Image Button -->
+    <div class="upload-button">
+      <button @click="openUploadModal">Add New Image</button>
+    </div>
+    <!-- Image Grid/Gallery/Results -->
     <div class="image-grid" v-if="images.length">
       <div class="image-item" v-for="image in images" :key="image.id" @click="showImage(image)">
         <img :src="image.url" :alt="image.title" />
@@ -76,12 +77,14 @@
   import FilterTable from './FilterTable.vue';
   import ModalComponent from "./ModalComponent.vue";
   import UploadImage from "./UploadImage.vue";
+  import TagList from "./TagList.vue";
   export default {
     components: {
       SearchBar,
       FilterTable,
       ModalComponent,
-      UploadImage
+      UploadImage,
+      TagList
     },
     data() {
       return {
@@ -252,6 +255,10 @@
         }
         this.selectedTags = [];
         this.toggleDeleteMode();
+      },toggleSearchMode(){
+        this.searchTagToggle = !this.searchTagToggle;
+      },handleTags({ images }) {
+        this.images = images;
       }
     }
   };
