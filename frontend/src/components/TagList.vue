@@ -7,6 +7,9 @@
             {{ tag.name + ' (' + tag.count + ')'}}
             </a>
         </div>
+        <div :class="['delete-button', {'delete-mode-active': deleteMode}]">
+            <a class="tag-anchor" @click="deleteMode ? deleteSelectedTags() : toggleDeleteMode()">X</a>
+        </div>
     </div>
 </template>
 
@@ -18,7 +21,8 @@ export default {
         return {
             images: [],
             tags: [],
-            selectedTags: []
+            selectedTags: [],
+            deleteMode: false
         };
     },
     created(){
@@ -28,10 +32,9 @@ export default {
         applyTags() {
             this.$emit('taglist', { images: this.images});
         },getAllTags(){
-            axios.get('http://localhost:8000/tags/with_count/')
+            axios.get('http://localhost:8000/tags/with_count')
             .then(response => {
                 this.tags = response.data;
-                
             })
             .catch(error => {
                 console.log(error);
@@ -42,7 +45,9 @@ export default {
             }else{
                 this.selectedTags.push(tag);
             }
-            this.searchImages();
+            if (!this.deleteMode){
+                this.searchImages();
+            }
 
         },searchImages(){
             const tag_ids = this.selectedTags.map(tag => tag.id);
@@ -63,15 +68,32 @@ export default {
             .catch(error => {
                 console.log(error);
             });
-        }
-        // ,getImageCount(tag_id){
-        //     axios.get('http://localhost:8000/tags/' + tag_id + '/count')
-        //     .then(response => {
-        //         return response.data;
-        //     }).catch(error => {
-        //         console.log(error);
-        //     });
-        // }
+        },deleteSelectedTags(){
+            for (let tag of this.selectedTags) {
+                this.deleteTag(tag);
+                this.tags = this.tags.filter(t => t !== tag);
+            }
+            this.selectedTags = [];
+            this.toggleDeleteMode();
+            this.searchImages();
+        },toggleDeleteMode(){
+            this.deleteMode = !this.deleteMode;
+        },deleteTag(tag){
+        axios.get(`http://localhost:8000/tags/name/` + tag.name)
+        .then(response => {
+          var tag_id = response.data.id;
+          axios.delete(`http://localhost:8000/tags/` + tag_id)
+          .then(response => {
+            console.log('Tag deleted from image:', response.data);
+          })
+          .catch(error => {
+            console.error('Error deleting tag from image:', error);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching tag:', error);
+        });
+      }
     }
 };
 
@@ -111,5 +133,21 @@ export default {
     border: none;
     color: white;
     cursor: pointer;
+  }
+
+  .delete-button{
+    display: flex;
+    /* padding: 0.5em; */
+    margin-top: 1em;
+    margin-right: 0.25em;
+    margin-bottom: 1em;
+    margin-left: 0.25em;
+    color: white;
+    background-color: rgb(70, 70, 70);
+    border-radius: 5px;
+    border: none;
+  }
+  .delete-mode-active{
+    background-color: red;
   }
 </style>

@@ -34,15 +34,22 @@
       </template>
       <template #content>
         <!-- The actual image -->
-        <img :src="modal_image.url" :alt="modal_image.title" v-if="modal_image"/>
-        <p>
-          {{ modal_image.description }}
-        </p>
+        <img 
+          :src="modal_image.url" 
+          :alt="modal_image.title"
+          ref="imageElement"
+          @load="adjustContainerSize"
+          v-if="modal_image"/>
+        <p>{{ modal_image.description }}</p>
         <!-- tags of the image (want to add option to add tags) -->
-        <!-- TODO: Find a Way to make tags start a new row instead of extending modal -->
-        <div class="tag-container">
-          <div v-for="tag in modalImgTags" :key="tag" 
-          :class="['tag', {'tag-selected': selectedTags.includes(tag)}]">
+        <div 
+          class="tag-container"
+          :style="{ maxWidth: containerWidth + 'px', maxHeight: containerHeight + 'px' }">
+        <!-- all tags -->
+          <div 
+            v-for="tag in modalImgTags" 
+            :key="tag" 
+            :class="['tag', {'tag-selected': selectedTags.includes(tag)}]">
               <a class="modal-button" 
               @click="deleteMode ? toggleTagForDeletion(tag) : handleSearch(`$${tag}`)">
                 {{ tag }}
@@ -58,7 +65,13 @@
             <a class="modal-button" @click="deleteMode ? deleteSelectedTags() : toggleDeleteMode()">X</a>
           </div>
         </div>
-        
+      </template>
+      <template #footer>
+        <div :class="['delete-button', {'delete-mode-active': deleteImage}]">
+          <a :class="['modal-button', {'delete-mode-active': deleteImage}]" @click="deleteModalImage()">
+            {{ deleteImage ? "Are you sure?" : "Delete Image"}}
+          </a>
+        </div>
       </template>
     </ModalComponent>
     <!-- MODAL TO UPLOAD IMG TO DB -->
@@ -88,6 +101,7 @@
     },
     data() {
       return {
+        backendURL: 'http://localhost:8000',
         images: [],
         query: '',
         skip: 0,
@@ -102,7 +116,10 @@
         newTag: '',
         selectedTags: [],
         deleteMode: false,
-        searchTagToggle: true
+        searchTagToggle: true,
+        deleteImage: false,
+        containerWidth: 0,
+        containerHeight: 0,
       };
     },
     created() {
@@ -110,11 +127,11 @@
     },
     methods: {
       fetchImages(query = '', skip = 0, limit = 100) {
-        axios.get(`http://localhost:8000/images/`, {
+        axios.get(backendURL + `/images/`, {
           params: {
             skip: skip,
             limit: limit,
-            title: query
+            title: query,
           }
         })
         .then(response => {
@@ -130,10 +147,10 @@
           return;
         }else if (query.startsWith('$')) {
           query = query.slice(1);
-          axios.get(`http://localhost:8000/tags/name/` + query)
+          axios.get(backendURL + `/tags/name/` + query)
           .then(response => {
             var tag_id = response.data.id;
-            axios.get(`http://localhost:8000/tags/` + tag_id + `/images`)
+            axios.get(backendURL + `/tags/` + tag_id + `/images`)
             .then(response => {
               this.images = response.data;
             })
@@ -145,7 +162,7 @@
             console.error('Error fetching images:', error);
           });
         }else{
-          axios.get(`http://localhost:8000/images/title/` + query)
+          axios.get(backendURL + `/images/title/` + query)
           .then(response => {
             this.images = response.data;
           })
@@ -162,7 +179,7 @@
         this.isImgModalOpen = true;
       },showImage(image){
         this.modal_image = image;
-        axios.get(`http://localhost:8000/images/` + image.id + `/tags`)
+        axios.get(backendURL + `/images/` + image.id + `/tags`)
         .then(response => {
           this.modalImgTags = [];
           for (let tag of response.data) {
@@ -178,7 +195,7 @@
       },closeUploadModal(){
         this.isUploadModalOpen = false;
       },uploadImage(title, description, url, tags){
-        axios.post(`http://localhost:8000/images/`, {
+        axios.post(backendURL + `/images/`, {
           title: title,
           description: description,
           url: url
@@ -193,7 +210,7 @@
         });
       },createTags(tags, image_id){
         for (let tag of tags) {
-          axios.post(`http://localhost:8000/tags/`, {
+          axios.post(backendURL + `/tags/`, {
             name: tag
           })
           .then(response => {
@@ -204,7 +221,7 @@
           });
         }
       },createImageTags(image_id, tag_name){
-        axios.post(`http://localhost:8000/image_tags/`, {
+        axios.post(backendURL + `/image_tags/`, {
           image_id: image_id,
           tag_name: tag_name
         })
@@ -224,10 +241,10 @@
           this.newTag = '';
         }
       },deleteTag(tag_name){
-        axios.get(`http://localhost:8000/tags/name/` + tag_name)
+        axios.get(backendURL + `/tags/name/` + tag_name)
         .then(response => {
           var tag_id = response.data.id;
-          axios.delete(`http://localhost:8000/image_tags/` + this.modal_image.id + `/` + tag_id)
+          axios.delete(backendURL + `/image_tags/` + this.modal_image.id + `/` + tag_id)
           .then(response => {
             console.log('Tag deleted from image:', response.data);
           })
@@ -239,7 +256,6 @@
           console.error('Error fetching tag:', error);
         });
       },toggleDeleteMode(){
-        console.log("called toggleDeleteMode")
         this.deleteMode = !this.deleteMode;
       },toggleTagForDeletion(tag_name){
         if (this.selectedTags.includes(tag_name)) {
@@ -259,6 +275,26 @@
         this.searchTagToggle = !this.searchTagToggle;
       },handleTags({ images }) {
         this.images = images;
+      },deleteModalImage(){
+        if (this.deleteImage){
+          axios.delete(backendURL + `/images/` + this.modal_image.id)
+        .then(response => {
+          console.log('Image deleted:', response.data);
+          this.images = this.images.filter(image => image.id !== this.modal_image.id);
+          this.closeImgModal();
+        })
+        .catch(error => {
+          console.error('Error deleting image:', error);
+        });
+        }
+        this.deleteImage = !this.deleteImage;
+      },adjustContainerSize() {
+        const imgElement = this.$refs.imageElement;
+        if (imgElement) {
+          // Set container size based on image size
+          this.containerWidth = imgElement.naturalWidth;
+          this.containerHeight = imgElement.naturalHeight;
+        }
       }
     }
   };
@@ -312,6 +348,7 @@
   .tag-container {
     display: flex;
     flex-wrap: wrap;
+    overflow-y: auto; /* Adds scroll if the content exceeds the container's height */
     justify-content: center;
     margin-top: 1em;
     width: 100%;

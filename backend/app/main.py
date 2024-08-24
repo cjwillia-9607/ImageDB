@@ -34,5 +34,5 @@ try:
     os.mkdir(static_dir_path)  # Create the static directory if it does not exist
 except FileExistsError:
     pass
-# print(static_dir_path)
+
 app.mount("/static", StaticFiles(directory=static_dir_path), name="static")
