@@ -34,7 +34,7 @@ cd backend
 ```
 2. Create the Virtual Python environment
 ```
-python -m venv env
+py -m venv env
 ```
 3. Start the Virtual Environment
 ```

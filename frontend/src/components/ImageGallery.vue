@@ -127,7 +127,7 @@
     },
     methods: {
       fetchImages(query = '', skip = 0, limit = 100) {
-        axios.get(backendURL + `/images/`, {
+        axios.get(this.backendURL + `/images/`, {
           params: {
             skip: skip,
             limit: limit,
@@ -147,10 +147,10 @@
           return;
         }else if (query.startsWith('$')) {
           query = query.slice(1);
-          axios.get(backendURL + `/tags/name/` + query)
+          axios.get(this.backendURL + `/tags/name/` + query)
           .then(response => {
             var tag_id = response.data.id;
-            axios.get(backendURL + `/tags/` + tag_id + `/images`)
+            axios.get(this.backendURL + `/tags/` + tag_id + `/images`)
             .then(response => {
               this.images = response.data;
             })
@@ -162,7 +162,7 @@
             console.error('Error fetching images:', error);
           });
         }else{
-          axios.get(backendURL + `/images/title/` + query)
+          axios.get(this.backendURL + `/images/title/` + query)
           .then(response => {
             this.images = response.data;
           })
@@ -179,7 +179,7 @@
         this.isImgModalOpen = true;
       },showImage(image){
         this.modal_image = image;
-        axios.get(backendURL + `/images/` + image.id + `/tags`)
+        axios.get(this.backendURL + `/images/` + image.id + `/tags`)
         .then(response => {
           this.modalImgTags = [];
           for (let tag of response.data) {
@@ -195,7 +195,7 @@
       },closeUploadModal(){
         this.isUploadModalOpen = false;
       },uploadImage(title, description, url, tags){
-        axios.post(backendURL + `/images/`, {
+        axios.post(this.backendURL + `/images/`, {
           title: title,
           description: description,
           url: url
@@ -210,7 +210,7 @@
         });
       },createTags(tags, image_id){
         for (let tag of tags) {
-          axios.post(backendURL + `/tags/`, {
+          axios.post(this.backendURL + `/tags/`, {
             name: tag
           })
           .then(response => {
@@ -221,7 +221,7 @@
           });
         }
       },createImageTags(image_id, tag_name){
-        axios.post(backendURL + `/image_tags/`, {
+        axios.post(this.backendURL + `/image_tags/`, {
           image_id: image_id,
           tag_name: tag_name
         })
@@ -241,10 +241,10 @@
           this.newTag = '';
         }
       },deleteTag(tag_name){
-        axios.get(backendURL + `/tags/name/` + tag_name)
+        axios.get(this.backendURL + `/tags/name/` + tag_name)
         .then(response => {
           var tag_id = response.data.id;
-          axios.delete(backendURL + `/image_tags/` + this.modal_image.id + `/` + tag_id)
+          axios.delete(this.backendURL + `/image_tags/` + this.modal_image.id + `/` + tag_id)
           .then(response => {
             console.log('Tag deleted from image:', response.data);
           })
@@ -277,7 +277,7 @@
         this.images = images;
       },deleteModalImage(){
         if (this.deleteImage){
-          axios.delete(backendURL + `/images/` + this.modal_image.id)
+          axios.delete(this.backendURL + `/images/` + this.modal_image.id)
         .then(response => {
           console.log('Image deleted:', response.data);
           this.images = this.images.filter(image => image.id !== this.modal_image.id);
